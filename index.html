@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hendrix Trading</title>
 
+<script src="https://s3.tradingview.com/tv.js"></script>
+
 <style>
 body {
   margin: 0;
@@ -13,259 +15,217 @@ body {
   color: white;
 }
 
-.container {
-  padding: 15px;
-  padding-bottom: 70px;
-}
-
-button {
-  padding: 12px;
-  margin: 5px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-}
-
-.buy { background: #00c853; color: white; }
-.sell { background: #ff1744; color: white; }
-
-.card {
-  background: #121826;
-  padding: 15px;
-  border-radius: 12px;
-  margin-top: 10px;
-}
-
-.header {
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.signal {
-  padding: 8px;
-  border-radius: 8px;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.signal.buy { background: #003d1f; }
-.signal.sell { background: #3d0000; }
-.signal.wait { background: #3d3d00; }
-
-/* NAVBAR */
-.navbar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #0d1b2a;
+/* LOGIN */
+.login {
+  height: 100vh;
   display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #222;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-.navbar button {
-  background: none;
+.login button {
+  width: 220px;
+  padding: 12px;
+  margin: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.guest {
+  background: #00c853;
+}
+
+.google {
+  background: #4285F4;
+}
+
+/* APP */
+.app {
+  display: none;
+  height: 100vh;
+}
+
+/* MAIN LAYOUT */
+.main {
+  display: flex;
+  height: 100%;
+}
+
+/* LEFT SYMBOL LIST */
+.symbols {
+  width: 30%;
+  background: #111827;
+  overflow-y: auto;
+  border-right: 1px solid #222;
+}
+
+.symbol {
+  padding: 15px;
+  border-bottom: 1px solid #222;
+  display: flex;
+  justify-content: space-between;
+}
+
+.symbol:hover {
+  background: #1f2937;
+  cursor: pointer;
+}
+
+/* RIGHT CHART */
+.chart-section {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CHART */
+#chart {
+  height: 70%;
+}
+
+/* TRADE PANEL */
+.trade {
+  height: 30%;
+  background: #111827;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.inputs input {
+  flex: 1;
+  padding: 10px;
+  background: #1f2937;
   border: none;
   color: white;
-  font-size: 14px;
+}
+
+/* BUTTONS */
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.buy {
+  background: #00c853;
+  padding: 15px;
+  width: 48%;
+  border: none;
+}
+
+.sell {
+  background: #d50000;
+  padding: 15px;
+  width: 48%;
+  border: none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="app"></div>
+<!-- LOGIN -->
+<div class="login" id="login">
+  <h1>Hendrix</h1>
 
-<!-- NAVBAR -->
-<div class="navbar">
-  <button onclick="renderHome()">Home</button>
-  <button onclick="renderMarket()">Market</button>
-  <button onclick="renderHome()">Trade</button>
-  <button onclick="renderHome()">History</button>
+  <!-- Guest TOP -->
+  <button class="guest" onclick="enterApp()">Continue as Guest</button>
+
+  <!-- Google BOTTOM -->
+  <button class="google">Login with Google</button>
 </div>
 
-<!-- TradingView Script -->
-<script src="https://s3.tradingview.com/tv.js"></script>
+<!-- APP -->
+<div class="app" id="app">
 
-<script>
-let balance = 5000;
-let currentPrice = 1900;
-let trades = [];
+  <div class="main">
 
-function renderOnboarding() {
-  document.getElementById("app").innerHTML = `
-    <div class="container">
-      <h1>Hendrix</h1>
-      <button onclick="startApp()">Continue as Guest</button>
-      <button>Login (Optional)</button>
-    </div>
-  `;
-}
-
-function startApp() {
-  renderHome();
-  setInterval(updatePrice, 10000);
-}
-
-function updatePrice() {
-  let change = (Math.random() - 0.5) * 10;
-  currentPrice += change;
-  renderHome();
-}
-
-function renderMarket() {
-  document.getElementById("app").innerHTML = `
-    <div class="container">
-      <div class="header">Live Market</div>
-
-      <div class="card">
-        <div id="chart" style="height:400px;"></div>
+    <!-- SYMBOL LIST -->
+    <div class="symbols" id="symbols">
+      <div class="symbol" onclick="loadChart('FX:EURUSD')">
+        <span>EURUSD</span>
+        <span id="p1">1.08</span>
       </div>
-    </div>
-  `;
-
-  new TradingView.widget({
-    "container_id": "chart",
-    "width": "100%",
-    "height": 400,
-    "symbol": "OANDA:XAUUSD",
-    "interval": "5",
-    "timezone": "Asia/Kolkata",
-    "theme": "dark",
-    "style": "1",
-    "locale": "en",
-    "toolbar_bg": "#0d1b2a",
-    "enable_publishing": false,
-    "hide_top_toolbar": false
-  });
-}
-
-function getTrend() {
-  let r = Math.random();
-  if (r > 0.66) return "UPTREND";
-  if (r < 0.33) return "DOWNTREND";
-  return "RANGE";
-}
-
-function getSignal() {
-  let r = Math.random();
-  if (r > 0.66) return "BUY";
-  if (r < 0.33) return "SELL";
-  return "WAIT";
-}
-
-function getConfidence() {
-  return Math.floor(Math.random() * 40) + 60;
-}
-
-function renderHome() {
-  let trend = getTrend();
-  let signal = getSignal();
-  let confidence = getConfidence();
-
-  document.getElementById("app").innerHTML = `
-  <div class="container">
-
-    <div class="header">Hendrix Dashboard</div>
-
-    <div class="card">
-      Balance: $${balance.toFixed(2)}
-    </div>
-
-    <div class="card">
-      <h3>Market</h3>
-      XAU/USD: $${currentPrice.toFixed(2)}
-      <div id="chart" style="height:300px;margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <h3>AI Analysis</h3>
-      Trend: ${trend} <br>
-      Confidence: ${confidence}%
-      <div class="signal ${signal.toLowerCase()}">
-        ${signal} SIGNAL
+      <div class="symbol" onclick="loadChart('FX:GBPUSD')">
+        <span>GBPUSD</span>
+        <span id="p2">1.26</span>
+      </div>
+      <div class="symbol" onclick="loadChart('FX:USDJPY')">
+        <span>USDJPY</span>
+        <span id="p3">151.2</span>
+      </div>
+      <div class="symbol" onclick="loadChart('BINANCE:BTCUSDT')">
+        <span>BTCUSD</span>
+        <span id="p4">65000</span>
       </div>
     </div>
 
-    <div class="card">
-      <h3>Trade</h3>
-      Lot Size: <input id="lot" value="1"><br>
-      SL: <input id="sl" value="10"><br>
-      TP: <input id="tp" value="20"><br>
+    <!-- RIGHT -->
+    <div class="chart-section">
 
-      <button class="buy" onclick="openTrade('BUY')">BUY</button>
-      <button class="sell" onclick="openTrade('SELL')">SELL</button>
-    </div>
+      <!-- CHART -->
+      <div id="chart"></div>
 
-    <div class="card">
-      <h3>Trades</h3>
-      ${trades.map(t => `
-        <div>
-          ${t.type} @ ${t.entry.toFixed(2)} → ${t.profit.toFixed(2)}
+      <!-- TRADE PANEL -->
+      <div class="trade">
+
+        <div class="inputs">
+          <input type="number" placeholder="Lot Size">
+          <input type="number" placeholder="Stop Loss">
+          <input type="number" placeholder="Take Profit">
         </div>
-      `).join("")}
+
+        <div class="buttons">
+          <button class="sell">SELL</button>
+          <button class="buy">BUY</button>
+        </div>
+
+      </div>
+
     </div>
 
   </div>
-  `;
+
+</div>
+
+<script>
+function enterApp() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  loadChart("FX:EURUSD");
+}
+
+/* LOAD CHART */
+function loadChart(symbol) {
+  document.getElementById("chart").innerHTML = "";
 
   new TradingView.widget({
-    "container_id": "chart",
     "width": "100%",
-    "height": 300,
-    "symbol": "OANDA:XAUUSD",
-    "interval": "5",
+    "height": "100%",
+    "symbol": symbol,
+    "interval": "15",
     "timezone": "Asia/Kolkata",
     "theme": "dark",
-    "style": "1",
-    "locale": "en",
-    "toolbar_bg": "#0d1b2a",
-    "enable_publishing": false,
-    "hide_top_toolbar": true
+    "style": "1", // candlestick
+    "container_id": "chart"
   });
 }
 
-function openTrade(type) {
-  let entry = currentPrice;
-  let sl = parseFloat(document.getElementById("sl").value);
-  let tp = parseFloat(document.getElementById("tp").value);
-
-  let trade = {
-    type,
-    entry,
-    sl,
-    tp,
-    profit: 0
-  };
-
-  trades.push(trade);
-  simulateTrade(trade);
-}
-
-function simulateTrade(trade) {
-  let interval = setInterval(() => {
-    let move = (Math.random() - 0.5) * 5;
-
-    if (trade.type === "BUY") trade.profit += move;
-    else trade.profit -= move;
-
-    if (trade.profit >= trade.tp) {
-      balance += trade.tp;
-      clearInterval(interval);
-    }
-
-    if (trade.profit <= -trade.sl) {
-      balance -= trade.sl;
-      clearInterval(interval);
-    }
-
-    renderHome();
-
-  }, 1000);
-}
-
-renderOnboarding();
+/* FAKE LIVE PRICE UPDATE */
+setInterval(() => {
+  document.getElementById("p1").innerText = (1.07 + Math.random()/100).toFixed(5);
+  document.getElementById("p2").innerText = (1.25 + Math.random()/100).toFixed(5);
+  document.getElementById("p3").innerText = (151 + Math.random()).toFixed(3);
+  document.getElementById("p4").innerText = (65000 + Math.random()*1000).toFixed(0);
+}, 1000);
 </script>
 
 </body>
