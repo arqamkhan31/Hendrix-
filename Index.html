@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hendrix Trading</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b0f1a;
+  color: white;
+}
+
+.container {
+  padding: 15px;
+}
+
+button {
+  padding: 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.buy { background: #00c853; color: white; }
+.sell { background: #ff1744; color: white; }
+
+.card {
+  background: #121826;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+.green { color: #00e676; }
+.red { color: #ff5252; }
+
+.header {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.signal {
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.signal.buy { background: #003d1f; }
+.signal.sell { background: #3d0000; }
+.signal.wait { background: #3d3d00; }
+
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+let balance = 5000;
+let currentPrice = 1900;
+let trades = [];
+
+function renderOnboarding() {
+  document.getElementById("app").innerHTML = `
+    <div class="container">
+      <h1>Hendrix</h1>
+      <button onclick="startApp()">Continue as Guest</button>
+      <button>Login (Optional)</button>
+    </div>
+  `;
+}
+
+function startApp() {
+  renderHome();
+  setInterval(updatePrice, 10000);
+}
+
+function updatePrice() {
+  let change = (Math.random() - 0.5) * 10;
+  currentPrice += change;
+  renderHome();
+}
+
+function getTrend() {
+  let r = Math.random();
+  if (r > 0.66) return "UPTREND";
+  if (r < 0.33) return "DOWNTREND";
+  return "RANGE";
+}
+
+function getSignal() {
+  let r = Math.random();
+  if (r > 0.66) return "BUY";
+  if (r < 0.33) return "SELL";
+  return "WAIT";
+}
+
+function getConfidence() {
+  return Math.floor(Math.random() * 40) + 60;
+}
+
+function renderHome() {
+  let trend = getTrend();
+  let signal = getSignal();
+  let confidence = getConfidence();
+
+  document.getElementById("app").innerHTML = `
+  <div class="container">
+
+    <div class="header">Hendrix Dashboard</div>
+
+    <div class="card">
+      Balance: $${balance.toFixed(2)}
+    </div>
+
+    <div class="card">
+      <h3>Market</h3>
+      XAU/USD: $${currentPrice.toFixed(2)}
+    </div>
+
+    <div class="card">
+      <h3>AI Analysis</h3>
+      Trend: ${trend} <br>
+      Confidence: ${confidence}%
+      <div class="signal ${signal.toLowerCase()}">
+        ${signal} SIGNAL
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Trade</h3>
+      Lot Size: <input id="lot" value="1"><br>
+      SL: <input id="sl" value="10"><br>
+      TP: <input id="tp" value="20"><br>
+
+      <button class="buy" onclick="openTrade('BUY')">BUY</button>
+      <button class="sell" onclick="openTrade('SELL')">SELL</button>
+    </div>
+
+    <div class="card">
+      <h3>Trades</h3>
+      ${trades.map(t => `
+        <div>
+          ${t.type} @ ${t.entry} → ${t.profit.toFixed(2)}
+        </div>
+      `).join("")}
+    </div>
+
+  </div>
+  `;
+}
+
+function openTrade(type) {
+  let entry = currentPrice;
+  let sl = parseFloat(document.getElementById("sl").value);
+  let tp = parseFloat(document.getElementById("tp").value);
+
+  let trade = {
+    type,
+    entry,
+    sl,
+    tp,
+    profit: 0
+  };
+
+  trades.push(trade);
+  simulateTrade(trade);
+}
+
+function simulateTrade(trade) {
+  let interval = setInterval(() => {
+    let move = (Math.random() - 0.5) * 5;
+
+    if (trade.type === "BUY") trade.profit += move;
+    else trade.profit -= move;
+
+    if (trade.profit >= trade.tp) {
+      balance += trade.tp;
+      clearInterval(interval);
+    }
+
+    if (trade.profit <= -trade.sl) {
+      balance -= trade.sl;
+      clearInterval(interval);
+    }
+
+    renderHome();
+
+  }, 1000);
+}
+
+renderOnboarding();
+</script>
+
+</body>
+  </html>
