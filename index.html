@@ -1,232 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hendrix Trading</title>
-
-<style>
-:root {
-  --bg: #0b0f1a;
-  --card: #121826;
-  --text: #ffffff;
-}
-
+<title>Hendrix Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://s3.tradingview.com/tv.js"></script><style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: var(--bg);
-  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+  background: #0b0f1a;
+  color: #fff;
 }
 
-/* LOGIN */
-.login {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.login button {
-  padding: 12px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #00c896;
-  color: white;
-  font-size: 16px;
-}
-
-/* APP */
-.app {
-  display: none;
-  height: 100vh;
-  flex-direction: column;
-}
-
-/* SECTIONS */
-.section {
-  display: none;
-  flex: 1;
-  overflow: auto;
-}
-
-.active {
-  display: block;
-}
-
-/* SYMBOL LIST */
-.symbol {
-  padding: 15px;
-  border-bottom: 1px solid #222;
+.header {
   display: flex;
   justify-content: space-between;
-  font-size: 16px;
+  padding: 10px 15px;
+  background: #121826;
+  border-bottom: 1px solid #1f2a3a;
 }
 
-/* CHART */
-.chart {
-  height: 100%;
-  background: black;
+.container {
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+  height: calc(100vh - 50px);
 }
 
-/* NAVBAR */
-.navbar {
-  height: 60px;
-  display: flex;
-  background: var(--card);
+.section {
+  padding: 10px;
+  overflow-y: auto;
 }
 
-.navbar button {
-  flex: 1;
+.symbol {
+  padding: 10px;
+  margin-bottom: 5px;
+  background: #121826;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.symbol:hover {
+  background: #1a2235;
+}
+
+.trade-panel input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
   border: none;
-  background: none;
-  color: var(--text);
+  background: #1a2235;
+  color: white;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.buy { background: #00c853; }
+.sell { background: #d50000; }
+
+.history {
   font-size: 14px;
 }
 
-.navbar button:hover {
-  background: #1c2333;
-}
+</style></head>
+<body><div class="header">
+  <div>Hendrix Pro</div>
+  <div>Balance: ₹<span id="balance">10000</span></div>
+</div><div class="container">  <!-- SYMBOL LIST -->  <div class="section">
+    <div class="symbol" onclick="loadChart('BINANCE:BTCUSDT')">BTC/USDT</div>
+    <div class="symbol" onclick="loadChart('BINANCE:ETHUSDT')">ETH/USDT</div>
+    <div class="symbol" onclick="loadChart('FX:EURUSD')">EUR/USD</div>
+  </div>  <!-- CHART -->  <div class="section">
+    <div id="chart" style="height:100%"></div>
+  </div>  <!-- TRADE PANEL -->  <div class="section trade-panel">
+    <input type="number" id="lot" placeholder="Lot Size">
+    <input type="number" id="sl" placeholder="Stop Loss">
+    <input type="number" id="tp" placeholder="Take Profit"><button class="buy" onclick="trade('BUY')">BUY</button>
+<button class="sell" onclick="trade('SELL')">SELL</button>
 
-/* SETTINGS */
-.settings-btn {
-  display: block;
-  margin: 15px;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  width: 90%;
-}
+<h3>History</h3>
+<div id="history" class="history"></div>
 
-/* LOGOUT */
-.logout {
-  background: red;
-  color: white;
-}
-</style>
-</head>
+  </div></div><script>
+let balance = 10000;
+let currentSymbol = 'BINANCE:BTCUSDT';
 
-<body>
-
-<!-- LOGIN -->
-<div class="login" id="login">
-  <h1>Hendrix</h1>
-  <button onclick="enterApp()">Continue as Guest</button>
-  <button onclick="enterApp()">Login</button>
-</div>
-
-<!-- APP -->
-<div class="app" id="app">
-
-  <!-- SYMBOLS -->
-  <div class="section" id="symbols">
-    <div class="symbol">EURUSD <span id="eur">1.0845</span></div>
-    <div class="symbol">BTCUSD <span id="btc">64000</span></div>
-    <div class="symbol">XAUUSD <span id="gold">2300</span></div>
-  </div>
-
-  <!-- CHART -->
-  <div class="section active" id="chart">
-    <div class="chart" id="tvchart"></div>
-  </div>
-
-  <!-- HISTORY -->
-  <div class="section" id="history">
-    <h2 style="padding:20px;">Trade History</h2>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="section" id="settings">
-    <h2 style="padding:20px;">Settings</h2>
-
-    <button class="settings-btn" onclick="setTheme('dark')">Dark Theme</button>
-    <button class="settings-btn" onclick="setTheme('blue')">Blue Theme</button>
-    <button class="settings-btn" onclick="setTheme('white')">White Theme</button>
-
-    <button class="settings-btn logout" onclick="logout()">Logout</button>
-  </div>
-
-  <!-- NAVBAR -->
-  <div class="navbar">
-    <button onclick="show('symbols')">Symbols</button>
-    <button onclick="show('chart')">Chart</button>
-    <button onclick="show('history')">History</button>
-    <button onclick="show('settings')">Settings</button>
-  </div>
-
-</div>
-
-<!-- TradingView Chart -->
-<script src="https://s3.tradingview.com/tv.js"></script>
-
-<script>
-function enterApp() {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").style.display = "flex";
-  show('chart');
-
-  // Load chart
+function loadChart(symbol) {
+  currentSymbol = symbol;
+  document.getElementById('chart').innerHTML = '';
   new TradingView.widget({
-    container_id: "tvchart",
-    symbol: "FX:EURUSD",
+    container_id: "chart",
+    width: "100%",
+    height: "100%",
+    symbol: symbol,
     interval: "1",
     theme: "dark",
-    style: "1",
-    width: "100%",
-    height: "100%"
+    style: "1"
   });
-
-  startPrices();
 }
 
-function show(sectionId) {
-  document.querySelectorAll(".section").forEach(sec => {
-    sec.classList.remove("active");
-  });
-  document.getElementById(sectionId).classList.add("active");
-}
+loadChart(currentSymbol);
 
-/* LIVE PRICE SIMULATION */
-function startPrices() {
-  setInterval(() => {
-    update("eur", 1.08, 1.09);
-    update("btc", 63000, 65000);
-    update("gold", 2280, 2320);
-  }, 1000);
-}
+function trade(type) {
+  let lot = document.getElementById('lot').value;
+  let history = document.getElementById('history');
 
-function update(id, min, max) {
-  let val = (Math.random() * (max - min) + min).toFixed(4);
-  document.getElementById(id).innerText = val;
-}
+  if (!lot) return alert('Enter lot size');
 
-/* THEMES */
-function setTheme(type) {
-  if(type === "dark") {
-    document.documentElement.style.setProperty('--bg', '#0b0f1a');
-    document.documentElement.style.setProperty('--card', '#121826');
-    document.documentElement.style.setProperty('--text', '#ffffff');
-  }
-  if(type === "blue") {
-    document.documentElement.style.setProperty('--bg', '#0a1f3a');
-    document.documentElement.style.setProperty('--card', '#123a6b');
-    document.documentElement.style.setProperty('--text', '#ffffff');
-  }
-  if(type === "white") {
-    document.documentElement.style.setProperty('--bg', '#f2f2f2');
-    document.documentElement.style.setProperty('--card', '#ffffff');
-    document.documentElement.style.setProperty('--text', '#000000');
-  }
-}
+  let profit = (Math.random() * 200 - 100).toFixed(2);
+  balance += parseFloat(profit);
 
-/* LOGOUT */
-function logout() {
-  document.getElementById("app").style.display = "none";
-  document.getElementById("login").style.display = "flex";
-}
-</script>
+  document.getElementById('balance').innerText = balance.toFixed(2);
 
-</body>
-</html>
+  history.innerHTML += `<div>${type} ${currentSymbol} | P/L: ₹${profit}</div>`;
+}
+</script></body>
+  </html>
