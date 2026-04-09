@@ -187,30 +187,140 @@ function openTrade(type){
   let lot = parseFloat(document.getElementById("lot").value);
   if(!lot) return alert("Enter lot");
 
-  trades.push({ type, entry:price, lot });
-  addHistory(type, price, lot);
-}
+Pasted--DOCTYPE-html-html-lang-en-head-meta-charset-UTF-8-titl_1775070255842.txt
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trade Mind Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- TradingView Chart -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
 
-/* UPDATE P/L */
-function updatePL(){
-  let total = 0;
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+    }
 
-  trades.forEach(t=>{
-    let profit = (price - t.entry) * t.lot;
-    if(t.type === "sell") profit *= -1;
-    total += profit;
-  });
+    header {
+      padding: 15px;
+      background: #020617;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
 
-  document.getElementById("pl").innerText = total.toFixed(2);
-  document.getElementById("bal").innerText = (balance + total).toFixed(2);
-}
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #22c55e;
+    }
 
-/* HISTORY */
-function addHistory(type, price, lot){
-  let div = document.createElement("div");
-  div.innerText = type.toUpperCase()+" | "+price.toFixed(2)+" | Lot:"+lot;
-  document.getElementById("history").prepend(div);
-}
+    .container {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    .chart {
+      flex: 3;
+      background: black;
+    }
+
+    .panel {
+      flex: 1;
+      background: #020617;
+      padding: 20px;
+      border-left: 1px solid #1e293b;
+    }
+
+    .balance {
+      margin-bottom: 20px;
+    }
+
+    .balance h2 {
+      margin: 0;
+      color: #22c55e;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .buy {
+      background: #22c55e;
+      color: black;
+    }
+
+    .sell {
+      background: #ef4444;
+      color: white;
+    }
+
+    .info {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Trade Mind</div>
+  <div>Live Trading Dashboard</div>
+</header>
+
+<div class="container">
+  
+  <!-- Chart -->
+  <div class="chart" id="tradingview_chart"></div>
+
+  <!-- Side Panel -->
+  <div class="panel">
+    <div class="balance">
+      <p>Balance</p>
+      <h2>$5,000</h2>
+    </div>
+
+    <button class="buy" onclick="alert('Buy Order Placed')">BUY</button>
+    <button class="sell" onclick="alert('Sell Order Placed')">SELL</button>
+
+    <div class="info">
+      Pair: EUR/USD<br>
+      Status: Demo Mode<br>
+      Risk: 1% per trade
+    </div>
+  </div>
+
+</div>
+
+<script>
+new TradingView.widget({
+  "container_id": "tradingview_chart",
+  "width": "100%",
+  "height": "100%",
+  "symbol": "FX:EURUSD",
+  "interval": "15",
+  "theme": "dark",
+  "style": "1",
+  "locale": "en",
+  "toolbar_bg": "#0f172a",
+  "enable_publishing": false,
+  "hide_top_toolbar": false,
+  "save_image": false
+});
 </script>
 
 </body>
