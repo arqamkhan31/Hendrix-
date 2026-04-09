@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hendrix Pro</title>
+<title>Hendrix Global Pro</title>
 
 <style>
 body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
@@ -18,27 +18,32 @@ body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
 
 /* SIDEBAR */
 .sidebar { width:25%; background:#121826; overflow:auto; }
-.symbol { padding:15px; border-bottom:1px solid #1f2937; cursor:pointer; }
+.tabs { display:flex; }
+.tabs button {
+  flex:1; padding:10px; border:none;
+  background:#1e293b; color:white; cursor:pointer;
+}
+
+.symbol { padding:12px; border-bottom:1px solid #1f2937; cursor:pointer; }
+.symbol:hover { background:#1e293b; }
 
 /* MAIN */
 .chart-area { width:75%; display:flex; flex-direction:column; }
 
-/* TOP */
-.topbar { display:flex; justify-content:space-between; padding:10px; background:#121826; }
+/* TOPBAR */
+.topbar { padding:10px; background:#121826; }
 
 /* CHART */
 #tv_chart { flex:1; }
 
 /* TRADE */
 .trade { display:flex; gap:5px; padding:10px; background:#121826; }
-.trade input { width:70px; }
-
-/* BUTTONS */
-.buy { background:green; color:white; }
-.sell { background:red; color:white; }
+.trade input { width:70px; padding:5px; }
+.buy { background:green; color:white; border:none; padding:8px; }
+.sell { background:red; color:white; border:none; padding:8px; }
 
 /* HISTORY */
-.history { height:150px; overflow:auto; background:#000; padding:10px; }
+.history { height:120px; overflow:auto; background:#000; padding:10px; }
 </style>
 </head>
 
@@ -57,185 +62,7 @@ body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="symbol" onclick="setSymbol('BTCUSDT')">BTC</div>
-    <div class="symbol" onclick="setSymbol('ETHUSDT')">ETH</div>
-  </div>
 
-  <!-- MAIN -->
-  <div class="chart-area">
-
-    <div class="topbar">
-      <div>
-        Balance: $<span id="bal">1000</span> |
-        P/L: $<span id="pl">0</span> |
-        Price: $<span id="price">0</span>
-      </div>
-    </div>
-
-    <div id="tv_chart"></div>
-
-    <div class="trade">
-      <input id="lot" placeholder="Lot">
-      <button class="buy" onclick="openTrade('buy')">BUY</button>
-      <button class="sell" onclick="openTrade('sell')">SELL</button>
-    </div>
-
-    <div class="history" id="history"></div>
-
-  </div>
-
-</div>
-
-<script src="https://s3.tradingview.com/tv.js"></script>
-
-<script>
-let widget;
-let symbol = "BTCUSDT";
-let balance = 1000;
-let trades = [];
-let price = 0;
-
-/* LOGIN */
-function enterApp(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").classList.add("active");
-  loadChart();
-  fetchPrice();
-}
-
-/* CHART */
-function loadChart(){
-  document.getElementById("tv_chart").innerHTML="";
-  widget = new TradingView.widget({
-    width:"100%",
-    height:"100%",
-    symbol:"BINANCE:"+symbol,
-    interval:"15",
-    theme:"dark",
-    container_id:"tv_chart"
-  });
-}
-
-/* CHANGE SYMBOL */
-function setSymbol(sym){
-  symbol = sym;
-  loadChart();
-}
-
-/* REAL PRICE (Binance API) */
-async function fetchPrice(){
-  setInterval(async ()=>{
-    let res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
-    let data = await res.json();
-    price = parseFloat(data.price);
-
-    document.getElementById("price").innerText = price.toFixed(2);
-
-    updatePL();
-  },1000);
-}
-
-/* OPEN TRADE */
-function openTrade(type){
-  let lot = parseFloat(document.getElementById("lot").value);
-  if(!lot) return alert("Enter lot");
-
-  trades.push({
-    type:type,
-    entry:price,
-    lot:lot
-  });
-
-  addHistory(type, price, lot);
-}
-
-/* UPDATE P/L */
-function updatePL(){
-  let totalPL = 0;
-
-  trades.forEach(t=>{
-    let profit = (price - t.entry) * t.lot;
-    if(t.type=="sell") profit *= -1;
-    totalPL += profit;
-  });
-
-  document.getElementById("pl").innerText = totalPL.toFixed(2);
-  document.getElementById("bal").innerText = (balance + totalPL).toFixed(2);
-}
-
-/* HISTORY */
-function addHistory(type, price, lot){
-  let h = document.getElementById("history");
-  let div = document.createElement("div");
-  div.innerText = type.toUpperCase()+" | "+price.toFixed(2)+" | Lot:"+lot;
-  h.prepend(div);
-}
-</script>
-
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hendrix Global</title>
-
-<style>
-body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
-
-/* LOGIN */
-.login { height:100vh; display:flex; justify-content:center; align-items:center; }
-.login-box { background:#121826; padding:20px; }
-
-/* APP */
-.app { display:none; height:100vh; }
-.app.active { display:flex; }
-
-/* SIDEBAR */
-.sidebar { width:25%; background:#121826; overflow:auto; }
-.tabs { display:flex; }
-.tabs button {
-  flex:1; padding:10px; background:#1e293b; border:none; color:white;
-}
-.symbol { padding:12px; border-bottom:1px solid #1f2937; cursor:pointer; }
-
-/* MAIN */
-.chart-area { width:75%; display:flex; flex-direction:column; }
-.topbar { padding:10px; background:#121826; }
-
-/* CHART */
-#tv_chart { flex:1; }
-
-/* TRADE */
-.trade { display:flex; gap:5px; padding:10px; background:#121826; }
-.trade input { width:70px; }
-.buy { background:green; color:white; }
-.sell { background:red; color:white; }
-
-/* HISTORY */
-.history { height:120px; overflow:auto; background:#000; padding:10px; }
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div class="login" id="login">
-  <div class="login-box">
-    <h2>Hendrix</h2>
-    <button onclick="enterApp()">Enter</button>
-  </div>
-</div>
-
-<!-- APP -->
-<div class="app" id="app">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-
-    <!-- TABS -->
     <div class="tabs">
       <button onclick="showTab('crypto')">Crypto</button>
       <button onclick="showTab('forex')">Forex</button>
@@ -244,20 +71,23 @@ body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
 
     <!-- CRYPTO -->
     <div id="crypto">
-      <div class="symbol" onclick="setSymbol('BTCUSDT','BINANCE')">BTC</div>
-      <div class="symbol" onclick="setSymbol('ETHUSDT','BINANCE')">ETH</div>
+      <div class="symbol" onclick="setSymbol('BTCUSDT','BINANCE')">BTC/USDT</div>
+      <div class="symbol" onclick="setSymbol('ETHUSDT','BINANCE')">ETH/USDT</div>
+      <div class="symbol" onclick="setSymbol('BNBUSDT','BINANCE')">BNB/USDT</div>
     </div>
 
     <!-- FOREX -->
     <div id="forex" style="display:none">
       <div class="symbol" onclick="setSymbol('EURUSD','FX')">EUR/USD</div>
       <div class="symbol" onclick="setSymbol('GBPUSD','FX')">GBP/USD</div>
+      <div class="symbol" onclick="setSymbol('USDJPY','FX')">USD/JPY</div>
     </div>
 
     <!-- STOCKS -->
     <div id="stocks" style="display:none">
       <div class="symbol" onclick="setSymbol('AAPL','NASDAQ')">Apple</div>
       <div class="symbol" onclick="setSymbol('TSLA','NASDAQ')">Tesla</div>
+      <div class="symbol" onclick="setSymbol('AMZN','NASDAQ')">Amazon</div>
     </div>
 
   </div>
@@ -291,6 +121,7 @@ body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
 let symbol = "BTCUSDT";
 let exchange = "BINANCE";
 let widget;
+
 let trades = [];
 let balance = 1000;
 let price = 0;
@@ -303,7 +134,7 @@ function enterApp(){
   fetchPrice();
 }
 
-/* TABS */
+/* TAB SWITCH */
 function showTab(tab){
   document.getElementById("crypto").style.display="none";
   document.getElementById("forex").style.display="none";
@@ -311,14 +142,14 @@ function showTab(tab){
   document.getElementById(tab).style.display="block";
 }
 
-/* SYMBOL */
+/* SYMBOL CHANGE */
 function setSymbol(sym, ex){
   symbol = sym;
   exchange = ex;
   loadChart();
 }
 
-/* CHART */
+/* CHART LOAD */
 function loadChart(){
   document.getElementById("tv_chart").innerHTML="";
   widget = new TradingView.widget({
@@ -331,15 +162,19 @@ function loadChart(){
   });
 }
 
-/* PRICE (Binance only real) */
-async function fetchPrice(){
+/* REAL PRICE (CRYPTO ONLY) */
+function fetchPrice(){
   setInterval(async ()=>{
-    if(exchange=="BINANCE"){
-      let res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
-      let data = await res.json();
-      price = parseFloat(data.price);
+    if(exchange === "BINANCE"){
+      try{
+        let res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+        let data = await res.json();
+        price = parseFloat(data.price);
+      } catch {
+        price = 0;
+      }
     } else {
-      price = Math.random()*100; // fallback for forex/stocks
+      price = price + (Math.random() - 0.5); // fallback
     }
 
     document.getElementById("price").innerText = price.toFixed(2);
@@ -347,7 +182,7 @@ async function fetchPrice(){
   },1000);
 }
 
-/* TRADE */
+/* OPEN TRADE */
 function openTrade(type){
   let lot = parseFloat(document.getElementById("lot").value);
   if(!lot) return alert("Enter lot");
@@ -356,17 +191,18 @@ function openTrade(type){
   addHistory(type, price, lot);
 }
 
-/* P/L */
+/* UPDATE P/L */
 function updatePL(){
   let total = 0;
+
   trades.forEach(t=>{
-    let p = (price - t.entry)*t.lot;
-    if(t.type=="sell") p*=-1;
-    total+=p;
+    let profit = (price - t.entry) * t.lot;
+    if(t.type === "sell") profit *= -1;
+    total += profit;
   });
 
   document.getElementById("pl").innerText = total.toFixed(2);
-  document.getElementById("bal").innerText = (balance+total).toFixed(2);
+  document.getElementById("bal").innerText = (balance + total).toFixed(2);
 }
 
 /* HISTORY */
