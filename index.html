@@ -1,327 +1,635 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hendrix Global Pro</title>
-
-<style>
-body { margin:0; font-family:Arial; background:#0b0f1a; color:white; }
-
-/* LOGIN */
-.login { height:100vh; display:flex; justify-content:center; align-items:center; }
-.login-box { background:#121826; padding:20px; text-align:center; }
-
-/* APP */
-.app { display:none; height:100vh; }
-.app.active { display:flex; }
-
-/* SIDEBAR */
-.sidebar { width:25%; background:#121826; overflow:auto; }
-.tabs { display:flex; }
-.tabs button {
-  flex:1; padding:10px; border:none;
-  background:#1e293b; color:white; cursor:pointer;
-}
-
-.symbol { padding:12px; border-bottom:1px solid #1f2937; cursor:pointer; }
-.symbol:hover { background:#1e293b; }
-
-/* MAIN */
-.chart-area { width:75%; display:flex; flex-direction:column; }
-
-/* TOPBAR */
-.topbar { padding:10px; background:#121826; }
-
-/* CHART */
-#tv_chart { flex:1; }
-
-/* TRADE */
-.trade { display:flex; gap:5px; padding:10px; background:#121826; }
-.trade input { width:70px; padding:5px; }
-.buy { background:green; color:white; border:none; padding:8px; }
-.sell { background:red; color:white; border:none; padding:8px; }
-
-/* HISTORY */
-.history { height:120px; overflow:auto; background:#000; padding:10px; }
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div class="login" id="login">
-  <div class="login-box">
-    <h2>Hendrix</h2>
-    <button onclick="enterApp()">Continue</button>
-  </div>
-</div>
-
-<!-- APP -->
-<div class="app" id="app">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-
-    <div class="tabs">
-      <button onclick="showTab('crypto')">Crypto</button>
-      <button onclick="showTab('forex')">Forex</button>
-      <button onclick="showTab('stocks')">Stocks</button>
-    </div>
-
-    <!-- CRYPTO -->
-    <div id="crypto">
-      <div class="symbol" onclick="setSymbol('BTCUSDT','BINANCE')">BTC/USDT</div>
-      <div class="symbol" onclick="setSymbol('ETHUSDT','BINANCE')">ETH/USDT</div>
-      <div class="symbol" onclick="setSymbol('BNBUSDT','BINANCE')">BNB/USDT</div>
-    </div>
-
-    <!-- FOREX -->
-    <div id="forex" style="display:none">
-      <div class="symbol" onclick="setSymbol('EURUSD','FX')">EUR/USD</div>
-      <div class="symbol" onclick="setSymbol('GBPUSD','FX')">GBP/USD</div>
-      <div class="symbol" onclick="setSymbol('USDJPY','FX')">USD/JPY</div>
-    </div>
-
-    <!-- STOCKS -->
-    <div id="stocks" style="display:none">
-      <div class="symbol" onclick="setSymbol('AAPL','NASDAQ')">Apple</div>
-      <div class="symbol" onclick="setSymbol('TSLA','NASDAQ')">Tesla</div>
-      <div class="symbol" onclick="setSymbol('AMZN','NASDAQ')">Amazon</div>
-    </div>
-
-  </div>
-
-  <!-- MAIN -->
-  <div class="chart-area">
-
-    <div class="topbar">
-      Balance: $<span id="bal">1000</span> |
-      P/L: $<span id="pl">0</span> |
-      Price: $<span id="price">0</span>
-    </div>
-
-    <div id="tv_chart"></div>
-
-    <div class="trade">
-      <input id="lot" placeholder="Lot">
-      <button class="buy" onclick="openTrade('buy')">BUY</button>
-      <button class="sell" onclick="openTrade('sell')">SELL</button>
-    </div>
-
-    <div class="history" id="history"></div>
-
-  </div>
-
-</div>
-
-<script src="https://s3.tradingview.com/tv.js"></script>
-
-<script>
-let symbol = "BTCUSDT";
-let exchange = "BINANCE";
-let widget;
-
-let trades = [];
-let balance = 1000;
-let price = 0;
-
-/* LOGIN */
-function enterApp(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").classList.add("active");
-  loadChart();
-  fetchPrice();
-}
-
-/* TAB SWITCH */
-function showTab(tab){
-  document.getElementById("crypto").style.display="none";
-  document.getElementById("forex").style.display="none";
-  document.getElementById("stocks").style.display="none";
-  document.getElementById(tab).style.display="block";
-}
-
-/* SYMBOL CHANGE */
-function setSymbol(sym, ex){
-  symbol = sym;
-  exchange = ex;
-  loadChart();
-}
-
-/* CHART LOAD */
-function loadChart(){
-  document.getElementById("tv_chart").innerHTML="";
-  widget = new TradingView.widget({
-    width:"100%",
-    height:"100%",
-    symbol:exchange+":"+symbol,
-    interval:"15",
-    theme:"dark",
-    container_id:"tv_chart"
-  });
-}
-
-/* REAL PRICE (CRYPTO ONLY) */
-function fetchPrice(){
-  setInterval(async ()=>{
-    if(exchange === "BINANCE"){
-      try{
-        let res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
-        let data = await res.json();
-        price = parseFloat(data.price);
-      } catch {
-        price = 0;
-      }
-    } else {
-      price = price + (Math.random() - 0.5); // fallback
-    }
-
-    document.getElementById("price").innerText = price.toFixed(2);
-    updatePL();
-  },1000);
-}
-
-/* OPEN TRADE */
-function openTrade(type){
-  let lot = parseFloat(document.getElementById("lot").value);
-  if(!lot) return alert("Enter lot");
-
-Pasted--DOCTYPE-html-html-lang-en-head-meta-charset-UTF-8-titl_1775070255842.txt
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Trade Mind Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- TradingView Chart -->
-  <script src="https://s3.tradingview.com/tv.js"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meridian Capital \u2014 Financial Markets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E2C97E;
+      --gold-dim: rgba(201,168,76,0.15);
+      --ink: #0D0E0F;
+      --ink-mid: #1B1C1E;
+      --ink-soft: #2A2B2E;
+      --cream: #F5F1EA;
+      --muted: #7A7770;
+      --line: rgba(201,168,76,0.25);
     }
 
-    header {
-      padding: 15px;
-      background: #020617;
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      overflow-x: hidden;
+    }
+
+    /* \u2500\u2500 NOISE OVERLAY \u2500\u2500 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* \u2500\u2500 NAV \u2500\u2500 */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1e293b;
+      padding: 28px 60px;
+      background: linear-gradient(to bottom, rgba(13,14,15,0.95), transparent);
+      transition: background 0.4s;
     }
 
-    .logo {
-      font-size: 20px;
-      font-weight: bold;
-      color: #22c55e;
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--gold-light);
+      text-transform: uppercase;
     }
 
-    .container {
+    .nav-links {
       display: flex;
-      height: calc(100vh - 60px);
+      gap: 40px;
+      list-style: none;
     }
 
-    .chart {
-      flex: 3;
-      background: black;
+    .nav-links a {
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cream);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.3s, color 0.3s;
     }
 
-    .panel {
-      flex: 1;
-      background: #020617;
-      padding: 20px;
-      border-left: 1px solid #1e293b;
+    .nav-links a:hover { opacity: 1; color: var(--gold-light); }
+
+    .nav-cta {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 10px 24px;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--ink); }
+
+    /* \u2500\u2500 HERO \u2500\u2500 */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 60px 80px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .balance {
+    /* Radial glow */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -20%; right: -10%;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* Animated chart lines */
+    .chart-bg {
+      position: absolute;
+      bottom: 60px; right: 60px;
+      width: 520px; height: 260px;
+      opacity: 0.12;
+    }
+
+    .chart-bg svg { width: 100%; height: 100%; }
+
+    .hero-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.2s forwards;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.2rem, 7vw, 6.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      max-width: 820px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.45s forwards;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .hero-rule {
+      width: 80px;
+      height: 1px;
+      background: var(--gold);
+      margin: 36px 0;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.65s forwards;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 460px;
+      line-height: 1.8;
+      letter-spacing: 0.03em;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.85s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 20px;
+      margin-top: 50px;
+      opacity: 0;
+      animation: fadeUp 0.9s 1.05s forwards;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--ink);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 16px 38px;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .btn-ghost {
+      color: var(--cream);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 16px 38px;
+      border: 1px solid rgba(245,241,234,0.25);
+      text-decoration: none;
+      transition: border-color 0.3s, color 0.3s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold-light); }
+
+    /* \u2500\u2500 TICKER \u2500\u2500 */
+    .ticker-bar {
+      background: var(--ink-mid);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      gap: 60px;
+      animation: ticker 28s linear infinite;
+    }
+
+    .ticker-item {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .ticker-sym { color: var(--gold-light); font-weight: 500; }
+    .ticker-val { color: var(--cream); opacity: 0.8; }
+    .ticker-up { color: #6FCF97; }
+    .ticker-dn { color: #EB5757; }
+
+    /* \u2500\u2500 STATS \u2500\u2500 */
+    .stats {
+      padding: 90px 60px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stat-cell {
+      background: var(--ink);
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.4rem;
+      font-weight: 300;
+      color: var(--gold-light);
+      display: block;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 12px;
+      display: block;
+    }
+
+    /* \u2500\u2500 SERVICES \u2500\u2500 */
+    .services {
+      padding: 110px 60px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+      margin-bottom: 70px;
+    }
+
+    .section-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      color: var(--gold);
+      opacity: 0.7;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 300;
+      line-height: 1.1;
+    }
+
+    .section-title em { font-style: italic; color: var(--gold-light); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .service-card {
+      background: var(--ink);
+      padding: 50px 40px;
+      position: relative;
+      transition: background 0.35s;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.5s ease;
+    }
+
+    .service-card:hover { background: var(--ink-mid); }
+    .service-card:hover::before { width: 100%; }
+
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 28px;
+      opacity: 0.75;
+    }
+
+    .service-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 16px;
+      color: var(--cream);
+    }
+
+    .service-card p {
+      font-size: 0.85rem;
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .service-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 28px;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      transition: gap 0.3s;
+    }
+    .service-link:hover { gap: 16px; }
+
+    /* \u2500\u2500 PHILOSOPHY \u2500\u2500 */
+    .philosophy {
+      padding: 110px 60px;
+      background: var(--ink-mid);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+    }
+
+    .phil-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.45;
+      color: var(--cream);
+    }
+
+    .phil-quote span { color: var(--gold-light); }
+
+    .phil-body p {
+      font-size: 0.88rem;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--muted);
       margin-bottom: 20px;
     }
 
-    .balance h2 {
-      margin: 0;
-      color: #22c55e;
+    .phil-rule {
+      width: 1px;
+      height: 80px;
+      background: var(--gold);
+      margin-bottom: 36px;
+      opacity: 0.5;
     }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 6px;
+    /* \u2500\u2500 MARKETS \u2500\u2500 */
+    .markets {
+      padding: 110px 60px;
+      max-width: 1300px;
+      margin: 0 auto;
     }
 
-    .buy {
-      background: #22c55e;
-      color: black;
+    .markets-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--line);
+      margin-top: 60px;
     }
 
-    .sell {
-      background: #ef4444;
-      color: white;
+    .market-row {
+      background: var(--ink);
+      padding: 32px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 2px solid transparent;
+      transition: background 0.3s, border-color 0.3s;
     }
 
-    .info {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #94a3b8;
+    .market-row:hover {
+      background: var(--ink-soft);
+      border-left-color: var(--gold);
+    }
+
+    .market-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+    }
+
+    .market-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 5px 14px;
+      border: 1px solid var(--line);
+    }
+
+    /* \u2500\u2500 CTA BANNER \u2500\u2500 */
+    .cta-banner {
+      padding: 120px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(201,168,76,0.07) 0%, transparent 60%);
+    }
+
+    .cta-banner h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 28px;
+    }
+
+    .cta-banner h2 em { font-style: italic; color: var(--gold-light); }
+
+    .cta-banner p {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 50px;
+      line-height: 1.8;
+    }
+
+    /* \u2500\u2500 FOOTER \u2500\u2500 */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--gold-light);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .footer-tagline {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .footer-links h4 {
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 10px; }
+    .footer-links a {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--cream); }
+
+    .footer-legal {
+      font-size: 0.7rem;
+      color: var(--muted);
+      opacity: 0.5;
+      line-height: 1.7;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--line);
+      padding: 24px 60px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--muted);
+      opacity: 0.5;
+      letter-spacing: 0.08em;
+    }
+
+    /* \u2500\u2500 ANIMATIONS \u2500\u2500 */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    @keyframes drawLine {
+      from { stroke-dashoffset: 800; }
+      to   { stroke-dashoffset: 0; }
+    }
+
+    .chart-bg path {
+      stroke-dasharray: 800;
+      stroke-dashoffset: 800;
+      animation: drawLine 3s 1.2s ease-out forwards;
+    }
+
+    /* scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* \u2500\u2500 RESPONSIVE \u2500\u2500 */
+    @media (max-width: 900px) {
+      nav { padding: 22px 28px; }
+      .nav-links, .nav-cta { display: none; }
+      .hero { padding: 120px 28px 60px; }
+      .chart-bg { display: none; }
+      .stats { grid-template-columns: repeat(2, 1fr); padding: 60px 28px; }
+      .services { padding: 80px 28px; }
+      .services-grid { grid-template-columns: 1fr; }
+      .philosophy { grid-template-columns: 1fr; gap: 50px; padding: 80px 28px; }
+      .markets { padding: 80px 28px; }
+      .markets-list { grid-template-columns: 1fr; }
+      .cta-banner { padding: 80px 28px; }
+      footer { grid-template-columns: 1fr; padding: 50px 28px; }
+      .footer-bottom { padding: 20px 28px; flex-direction: column; gap: 8px; }
     }
   </style>
 </head>
-
 <body>
 
-<header>
-  <div class="logo">Trade Mind</div>
-  <div>Live Trading Dashboard</div>
-</header>
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Meridian Capital</div>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#markets">Markets</a></li>
+      <li><a href="#philosophy">Philosophy</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Open Account</a>
+  </nav>
 
-<div class="container">
-  
-  <!-- Chart -->
-  <div class="chart" id="tradingview_chart"></div>
-
-  <!-- Side Panel -->
-  <div class="panel">
-    <div class="balance">
-      <p>Balance</p>
-      <h2>$5,000</h2>
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">Global Financial Markets</p>
+    <h1>Where Capital Meets <em>Precision</em></h1>
+    <div class="hero-rule"></div>
+    <p class="hero-sub">
+      Meridian Capital delivers institutional-grade market intelligence, portfolio strategy, and access to global financial markets \u2014 for those who demand more.
+    </p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary">Explore Services</a>
+      <a href="#philosophy" class="btn-ghost">Our Philosophy</a>
     </div>
 
-    <button class="buy" onclick="alert('Buy Order Placed')">BUY</button>
-    <button class="sell" onclick="alert('Sell Order Placed')">SELL</button>
-
-    <div class="info">
-      Pair: EUR/USD<br>
-      Status: Demo Mode<br>
-      Risk: 1% per trade
-    </div>
-  </div>
-
-</div>
-
-<script>
-new TradingView.widget({
-  "container_id": "tradingview_chart",
-  "width": "100%",
-  "height": "100%",
-  "symbol": "FX:EURUSD",
-  "interval": "15",
-  "theme": "dark",
-  "style": "1",
-  "locale": "en",
-  "toolbar_bg": "#0f172a",
-  "enable_publishing": false,
-  "hide_top_toolbar": false,
-  "save_image": false
-});
-</script>
-
-</body>
-</html>
+    <!-- Animated chart -->
+    <div class="chart-bg">
+      <svg viewBox="0 0 520 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid lines -->
+        <line x1="0" y1="65" x2="520" y2="65" stroke="#C9A84C" stroke-width="0.4" stroke-dasharray="4 6"/>
+        <line x1="0" y1="130" x2="520" y2="130" stroke="#C9A84C" stroke-width="0.4" stroke-dasharray="4 6"/>
+        <line x1="0" y1="195" x2="520" y2="195" stroke="#C9A84C" stroke-width="0.4" stroke-dasharray="4 6"/>
+        <!-- Main price line -->
+        <path d="M0,200 L40,185 L80,195 L120,160 L160,170 L200,130 L240,145 L280,100 L320,110 L360,75 L400,85 L440,50 L480,60 L520,30"
+              stroke="#C9A84C" stroke-width="1.5" fill
